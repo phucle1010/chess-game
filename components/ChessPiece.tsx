@@ -49,7 +49,7 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({ piece, position }) => {
 
   return (
     <div
-      ref={(node) => drag(node)}
+      ref={drag as unknown as React.Ref<HTMLDivElement>}
       className={`chess-piece cursor-move select-none transition-all duration-200 ${
         isDragging ? "opacity-50 scale-110" : "hover:scale-110"
       }`}
