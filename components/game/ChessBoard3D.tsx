@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -37,10 +37,6 @@ const initialBoard: Board = [
   ],
 ];
 
-const isTouchDevice = () => {
-  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-};
-
 interface ChessBoard3DProps {
   onMove: (from: [number, number], to: [number, number], piece: Piece) => void;
   currentTurn: PieceColor;
@@ -59,6 +55,20 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     null
   );
   const [legalMoves, setLegalMoves] = useState<[number, number][]>([]);
+  const [backend, setBackend] = useState<
+    typeof TouchBackend | typeof HTML5Backend | null
+  >(null);
+
+  // Initialize backend on client side only
+  useEffect(() => {
+    const isTouchDevice = () => {
+      return (
+        typeof window !== "undefined" &&
+        ("ontouchstart" in window || navigator.maxTouchPoints > 0)
+      );
+    };
+    setBackend(isTouchDevice() ? TouchBackend : HTML5Backend);
+  }, []);
 
   const handleDrop = (from: [number, number], to: [number, number]) => {
     const [fromRow, fromCol] = from;
@@ -245,8 +255,6 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     return true;
   };
 
-  const backend = isTouchDevice() ? TouchBackend : HTML5Backend;
-
   // Check if a square is a legal move
   const isSquareLegalMove = (position: [number, number]): boolean => {
     return legalMoves.some(
@@ -270,6 +278,13 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     if (!piece) return undefined;
     return piece.type.charAt(0).toUpperCase() + piece.type.slice(1);
   };
+
+  // Don't render until backend is loaded (prevents SSR issues)
+  if (!backend) {
+    return (
+      <div className="w-full max-w-[600px] mx-auto aspect-square bg-slate-900 rounded-lg" />
+    );
+  }
 
   return (
     <DndProvider backend={backend}>
