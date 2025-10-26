@@ -11,7 +11,7 @@ import { ChatPanel } from "@/components/game/ChatPanel";
 import { MoveHistory } from "@/components/game/MoveHistory";
 import { PieceGuide } from "@/components/game/PieceGuide";
 import { GameStats } from "@/components/game/GameStats";
-import { BoardLegend } from "@/components/game/BoardLegend";
+// import { BoardLegend } from "@/components/game/BoardLegend";
 import { HelpTooltip } from "@/components/game/HelpTooltip";
 import { SettingsModal } from "@/components/modals/SettingsModal";
 import { ResultModal } from "@/components/modals/ResultModal";
