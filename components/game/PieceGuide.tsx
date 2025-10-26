@@ -73,7 +73,7 @@ export const PieceGuide: React.FC = () => {
       <CardContent className="p-0">
         <Tabs defaultValue="pawn" className="w-full">
           <div className="px-4">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-1 bg-slate-900/50 p-1">
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-1 bg-slate-900/50 p-1 !h-fit">
               {pieces.map((piece) => (
                 <TabsTrigger
                   key={piece.name.toLowerCase()}
