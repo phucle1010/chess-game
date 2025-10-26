@@ -13,7 +13,7 @@ export const MoveHistory: React.FC<MoveHistoryProps> = ({ moves }) => {
   }
 
   return (
-    <Card className="bg-slate-800/80 border-slate-700 h-full">
+    <Card className="bg-slate-800/80 border-slate-700">
       <CardHeader className="pb-3">
         <CardTitle className="text-white">Move History</CardTitle>
       </CardHeader>
