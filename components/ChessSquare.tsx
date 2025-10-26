@@ -46,7 +46,7 @@ export const ChessSquare: React.FC<ChessSquareProps> = ({
 
   return (
     <div
-      ref={drop}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       className={`w-full h-full aspect-square flex items-center justify-center ${getBgColor()} transition-all duration-200 relative`}
       style={{
         boxShadow: isLight
