@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ScrollArea } from "../ui/scroll-area";
 import { Send } from "lucide-react";
 
-interface Message {
-  id: string;
-  sender: string;
-  text: string;
-  timestamp: Date;
-  isSelf: boolean;
+import { Message } from "@/types/chat";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface ChatPanelProps {
+  hideHeader?: boolean;
 }
 
-export const ChatPanel: React.FC = () => {
+export const ChatPanel: React.FC<ChatPanelProps> = ({ hideHeader = false }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -47,10 +46,12 @@ export const ChatPanel: React.FC = () => {
   };
 
   return (
-    <Card className="bg-slate-800/80 border-slate-700 h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white">Chat</CardTitle>
-      </CardHeader>
+    <Card className="bg-transparent border-0 h-full flex flex-col">
+      {!hideHeader && (
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white">Chat</CardTitle>
+        </CardHeader>
+      )}
       <CardContent className="flex-1 flex flex-col gap-3 p-4 pt-0">
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-3">

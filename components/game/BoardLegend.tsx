@@ -1,5 +1,6 @@
-import { Card, CardContent } from "../ui/card";
 import { Target } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 export const BoardLegend: React.FC = () => {
   return (

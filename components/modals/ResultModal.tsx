@@ -1,12 +1,13 @@
+import { Trophy, Medal, Award } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Trophy, Medal, Award } from "lucide-react";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ResultModalProps {
   open: boolean;
