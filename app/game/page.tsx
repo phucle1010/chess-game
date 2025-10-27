@@ -16,7 +16,7 @@ import { GameStats } from "@/components/game/GameStats";
 import { HelpTooltip } from "@/components/game/HelpTooltip";
 import { SettingsModal } from "@/components/modals/SettingsModal";
 import { ResultModal } from "@/components/modals/ResultModal";
-import { PieceColor, Piece } from "@/components/ChessPiece";
+import { PieceColor, Piece } from "@/components/game/ChessPiece";
 
 const pieceSymbols: Record<PieceColor, Record<string, string>> = {
   white: {

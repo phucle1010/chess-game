@@ -1,10 +1,7 @@
-import { useState, useMemo } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { TouchBackend } from "react-dnd-touch-backend";
+import { useState } from "react";
 
-import { ChessSquare } from "../ChessSquare";
-import { Piece, PieceColor } from "../ChessPiece";
+import { ChessSquare } from "./ChessSquare";
+import { Piece, PieceColor } from "./ChessPiece";
 import { MoveIndicator } from "./MoveIndicator";
 
 type Board = (Piece | null)[][];
@@ -56,22 +53,11 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     null
   );
   const [legalMoves, setLegalMoves] = useState<[number, number][]>([]);
-  // Initialize backend on client side only
-  const BackendComponent = useMemo(() => {
-    if (typeof window === "undefined") return null;
 
-    const isTouchDevice = () => {
-      return (
-        typeof window !== "undefined" &&
-        ("ontouchstart" in window || navigator.maxTouchPoints > 0)
-      );
-    };
+  const makeMove = (to: [number, number]) => {
+    if (!selectedSquare) return;
 
-    return isTouchDevice() ? TouchBackend : HTML5Backend;
-  }, []);
-
-  const handleDrop = (from: [number, number], to: [number, number]) => {
-    const [fromRow, fromCol] = from;
+    const [fromRow, fromCol] = selectedSquare;
     const [toRow, toCol] = to;
 
     const piece = board[fromRow][fromCol];
@@ -82,7 +68,7 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     const targetPiece = board[toRow][toCol];
     if (targetPiece && targetPiece.color === piece.color) return;
 
-    if (!isValidMove(piece, from, to, board)) return;
+    if (!isValidMove(piece, selectedSquare, to, board)) return;
 
     // Capture piece
     if (targetPiece && onCapture) {
@@ -94,7 +80,7 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     newBoard[fromRow][fromCol] = null;
 
     setBoard(newBoard);
-    onMove(from, to, piece);
+    onMove(selectedSquare, to, piece);
 
     // Clear selection and legal moves after move
     setSelectedSquare(null);
@@ -148,7 +134,7 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
       }
     } else if (selectedSquare) {
       // If a piece is selected, try to move to clicked square
-      handleDrop(selectedSquare, position);
+      makeMove(position);
     } else {
       // Clear selection
       setSelectedSquare(null);
@@ -279,114 +265,60 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     return piece.type.charAt(0).toUpperCase() + piece.type.slice(1);
   };
 
-  // Don't render until backend is loaded (prevents SSR issues)
-  if (!BackendComponent) {
-    return (
-      <div className="w-full max-w-[600px] mx-auto aspect-square bg-slate-900 rounded-lg" />
-    );
-  }
-
   return (
-    <DndProvider backend={BackendComponent}>
-      <div className="relative w-full">
-        {/* Move Indicator */}
-        <MoveIndicator
-          show={legalMoves.length > 0}
-          pieceName={getSelectedPieceName()}
-        />
+    <div className="relative w-full">
+      {/* Move Indicator */}
+      <MoveIndicator
+        show={legalMoves.length > 0}
+        pieceName={getSelectedPieceName()}
+      />
 
-        {/* Chess Board Container */}
-        <div className="w-full max-w-[min(90vw,600px)] mx-auto px-2 sm:px-0">
-          {/* Board with 3D effect */}
-          <div className="board-container relative">
-            <div className="board-wrapper">
-              <div className="grid grid-cols-8 w-full aspect-square bg-slate-900 rounded-lg overflow-hidden shadow-2xl border-4 border-slate-700/50">
-                {board.map((row, rowIndex) =>
-                  row.map((piece, colIndex) => {
-                    const position: [number, number] = [rowIndex, colIndex];
-                    return (
-                      <div
-                        key={`${rowIndex}-${colIndex}`}
-                        onClick={() => handleSquareClick(position)}
-                        className="cursor-pointer"
-                      >
-                        <ChessSquare
-                          position={position}
-                          piece={piece}
-                          onDrop={handleDrop}
-                          isLegalMove={isSquareLegalMove(position)}
-                          isSelected={isSquareSelected(position)}
-                        />
-                      </div>
-                    );
-                  })
-                )}
+      {/* Chess Board Container */}
+      <div className="w-full max-w-[min(90vw,600px)] mx-auto px-2 sm:px-0">
+        {/* Board flat layout */}
+        <div className="board-container relative">
+          <div className="grid grid-cols-8 w-full aspect-square bg-slate-900 rounded-lg overflow-hidden shadow-lg border-4 border-slate-700/50 relative">
+            {board.map((row, rowIndex) =>
+              row.map((piece, colIndex) => {
+                const position: [number, number] = [rowIndex, colIndex];
+                return (
+                  <ChessSquare
+                    key={`${rowIndex}-${colIndex}`}
+                    position={position}
+                    piece={piece}
+                    onClick={() => handleSquareClick(position)}
+                    isLegalMove={isSquareLegalMove(position)}
+                    isSelected={isSquareSelected(position)}
+                  />
+                );
+              })
+            )}
+          </div>
+
+          {/* Coordinate labels - hidden on mobile, shown on sm+ */}
+          <div className="hidden sm:flex absolute -bottom-8 left-0 right-0 justify-around px-2">
+            {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
+              <div key={letter} className="w-[12.5%] text-center">
+                <span className="text-slate-400 text-sm">{letter}</span>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Coordinate labels - hidden on mobile, shown on sm+ */}
-            <div className="hidden sm:flex absolute -bottom-8 left-0 right-0 justify-around px-2">
-              {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
-                <div key={letter} className="w-[12.5%] text-center">
-                  <span className="text-slate-400 text-sm">{letter}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="hidden sm:flex absolute -left-8 top-0 bottom-0 flex-col justify-around py-2">
-              {["8", "7", "6", "5", "4", "3", "2", "1"].map((number) => (
-                <div key={number} className="h-[12.5%] flex items-center">
-                  <span className="text-slate-400 text-sm">{number}</span>
-                </div>
-              ))}
-            </div>
+          <div className="hidden sm:flex absolute -left-8 top-0 bottom-0 flex-col justify-around py-2">
+            {["8", "7", "6", "5", "4", "3", "2", "1"].map((number) => (
+              <div key={number} className="h-[12.5%] flex items-center">
+                <span className="text-slate-400 text-sm">{number}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       <style>{`
         .board-container {
-          perspective: 1500px;
-        }
-        
-        .board-wrapper {
-          transform-style: preserve-3d;
-          transform: rotateX(10deg) rotateZ(-1deg);
-          transition: transform 0.3s ease;
-        }
-        
-        .board-wrapper:hover {
-          transform: rotateX(8deg) rotateZ(-0.5deg);
-        }
-        
-        .board-wrapper > div {
-          box-shadow: 
-            0 30px 80px rgba(0, 0, 0, 0.6),
-            0 15px 40px rgba(124, 58, 237, 0.2),
-            0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-        
-        @media (max-width: 768px) {
-          .board-container {
-            perspective: 1000px;
-          }
-          
-          .board-wrapper {
-            transform: rotateX(3deg) rotateZ(-0.3deg);
-          }
-          
-          .board-wrapper:hover {
-            transform: rotateX(2deg) rotateZ(-0.2deg);
-          }
-          
-          .board-wrapper > div {
-            box-shadow: 
-              0 15px 40px rgba(0, 0, 0, 0.4),
-              0 8px 20px rgba(124, 58, 237, 0.1);
-            border-width: 2px;
-          }
+          /* Flat board - no 3D effects */
         }
       `}</style>
-    </DndProvider>
+    </div>
   );
 };

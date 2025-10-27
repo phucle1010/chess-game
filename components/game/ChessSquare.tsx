@@ -1,11 +1,10 @@
-import { useDrop } from "react-dnd";
 import { ChessPiece, Piece } from "./ChessPiece";
 import { Target } from "lucide-react";
 
 interface ChessSquareProps {
   position: [number, number];
   piece: Piece | null;
-  onDrop: (from: [number, number], to: [number, number]) => void;
+  onClick?: () => void;
   isLegalMove?: boolean;
   isSelected?: boolean;
 }
@@ -13,30 +12,16 @@ interface ChessSquareProps {
 export const ChessSquare: React.FC<ChessSquareProps> = ({
   position,
   piece,
-  onDrop,
+  onClick,
   isLegalMove = false,
   isSelected = false,
 }) => {
   const [row, col] = position;
   const isLight = (row + col) % 2 === 0;
 
-  const [{ isOver, canDrop }, drop] = useDrop(() => ({
-    accept: "piece",
-    drop: (item: { piece: Piece; position: [number, number] }) => {
-      onDrop(item.position, position);
-    },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop(),
-    }),
-  }));
-
   const getBgColor = () => {
     if (isSelected) {
       return isLight ? "bg-yellow-300" : "bg-yellow-600";
-    }
-    if (isOver && canDrop) {
-      return isLight ? "bg-green-300" : "bg-green-600";
     }
     if (isLegalMove) {
       return isLight ? "bg-blue-200" : "bg-blue-700";
@@ -46,7 +31,7 @@ export const ChessSquare: React.FC<ChessSquareProps> = ({
 
   return (
     <div
-      ref={drop as unknown as React.Ref<HTMLDivElement>}
+      onClick={onClick}
       className={`w-full h-full aspect-square flex items-center justify-center ${getBgColor()} transition-all duration-200 relative`}
       style={{
         boxShadow: isLight
@@ -54,7 +39,7 @@ export const ChessSquare: React.FC<ChessSquareProps> = ({
           : "inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.15)",
       }}
     >
-      {piece && <ChessPiece piece={piece} position={position} />}
+      {piece && <ChessPiece piece={piece} />}
 
       {/* Legal move indicator */}
       {isLegalMove && !piece && (
