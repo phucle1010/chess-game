@@ -1,5 +1,8 @@
-import { ChessPiece, Piece } from "./ChessPiece";
 import { Target } from "lucide-react";
+
+import { Piece } from "@/types/chess-piece";
+
+import { ChessPiece } from "./ChessPiece";
 
 interface ChessSquareProps {
   position: [number, number];

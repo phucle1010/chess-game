@@ -1,17 +1,12 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ScrollArea } from "../ui/scroll-area";
 import { Send } from "lucide-react";
 
-interface Message {
-  id: string;
-  sender: string;
-  text: string;
-  timestamp: Date;
-  isSelf: boolean;
-}
+import { Message } from "@/types/chat";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatPanelProps {
   hideHeader?: boolean;

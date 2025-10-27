@@ -1,9 +1,9 @@
 import { Clock, Crown } from "lucide-react";
 
+import { PieceColor } from "@/types/chess-piece";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-
-import { PieceColor } from "./ChessPiece";
 
 interface PlayerCardProps {
   name: string;

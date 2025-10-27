@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { MessageCircle, X, Minus } from "lucide-react";
-import { Button } from "../ui/button";
-import { ChatPanel } from "./ChatPanel";
+
+import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
+
+import { ChatPanel } from "./ChatPanel";
 
 export const ChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

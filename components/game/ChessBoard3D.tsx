@@ -1,10 +1,9 @@
 import { useState } from "react";
 
-import { ChessSquare } from "./ChessSquare";
-import { Piece, PieceColor } from "./ChessPiece";
-import { MoveIndicator } from "./MoveIndicator";
+import { Board, Piece, PieceColor } from "@/types/chess-piece";
 
-type Board = (Piece | null)[][];
+import { ChessSquare } from "./ChessSquare";
+import { MoveIndicator } from "./MoveIndicator";
 
 const initialBoard: Board = [
   [

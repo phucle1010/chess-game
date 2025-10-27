@@ -1,5 +1,6 @@
-import { Card, CardContent } from "../ui/card";
 import { Activity, Target, Zap } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 interface GameStatsProps {
   legalMovesCount?: number;

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Settings, Flag } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { Piece, PieceColor } from "@/types/chess-piece";
+
 import { Button } from "@/components/ui/button";
 import { ChessBoard3D } from "@/components/game/ChessBoard3D";
 import { PlayerCard } from "@/components/game/PlayerCard";
@@ -16,7 +18,6 @@ import { GameStats } from "@/components/game/GameStats";
 import { HelpTooltip } from "@/components/game/HelpTooltip";
 import { SettingsModal } from "@/components/modals/SettingsModal";
 import { ResultModal } from "@/components/modals/ResultModal";
-import { PieceColor, Piece } from "@/components/game/ChessPiece";
 
 const pieceSymbols: Record<PieceColor, Record<string, string>> = {
   white: {

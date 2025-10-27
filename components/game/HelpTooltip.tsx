@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, Lightbulb } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const HelpTooltip: React.FC = () => {
   const [show, setShow] = useState(false);
