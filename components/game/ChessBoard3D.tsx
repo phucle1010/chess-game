@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
+
 import { ChessSquare } from "../ChessSquare";
 import { Piece, PieceColor } from "../ChessPiece";
 import { MoveIndicator } from "./MoveIndicator";
@@ -55,19 +56,18 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     null
   );
   const [legalMoves, setLegalMoves] = useState<[number, number][]>([]);
-  const [backend, setBackend] = useState<
-    typeof TouchBackend | typeof HTML5Backend | null
-  >(null);
-
   // Initialize backend on client side only
-  useEffect(() => {
+  const BackendComponent = useMemo(() => {
+    if (typeof window === "undefined") return null;
+
     const isTouchDevice = () => {
       return (
         typeof window !== "undefined" &&
         ("ontouchstart" in window || navigator.maxTouchPoints > 0)
       );
     };
-    setBackend(isTouchDevice() ? TouchBackend : HTML5Backend);
+
+    return isTouchDevice() ? TouchBackend : HTML5Backend;
   }, []);
 
   const handleDrop = (from: [number, number], to: [number, number]) => {
@@ -280,14 +280,14 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
   };
 
   // Don't render until backend is loaded (prevents SSR issues)
-  if (!backend) {
+  if (!BackendComponent) {
     return (
       <div className="w-full max-w-[600px] mx-auto aspect-square bg-slate-900 rounded-lg" />
     );
   }
 
   return (
-    <DndProvider backend={backend}>
+    <DndProvider backend={BackendComponent}>
       <div className="relative w-full">
         {/* Move Indicator */}
         <MoveIndicator
@@ -296,7 +296,7 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
         />
 
         {/* Chess Board Container */}
-        <div className="w-full max-w-[600px] mx-auto">
+        <div className="w-full max-w-[min(90vw,600px)] mx-auto px-2 sm:px-0">
           {/* Board with 3D effect */}
           <div className="board-container relative">
             <div className="board-wrapper">
@@ -324,19 +324,19 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
               </div>
             </div>
 
-            {/* Coordinate labels */}
-            <div className="absolute -bottom-8 left-0 right-0 flex justify-around px-2">
+            {/* Coordinate labels - hidden on mobile, shown on sm+ */}
+            <div className="hidden sm:flex absolute -bottom-8 left-0 right-0 justify-around px-2">
               {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
                 <div key={letter} className="w-[12.5%] text-center">
-                  <span className="text-slate-400">{letter}</span>
+                  <span className="text-slate-400 text-sm">{letter}</span>
                 </div>
               ))}
             </div>
 
-            <div className="absolute -left-8 top-0 bottom-0 flex flex-col justify-around py-2">
+            <div className="hidden sm:flex absolute -left-8 top-0 bottom-0 flex-col justify-around py-2">
               {["8", "7", "6", "5", "4", "3", "2", "1"].map((number) => (
                 <div key={number} className="h-[12.5%] flex items-center">
-                  <span className="text-slate-400">{number}</span>
+                  <span className="text-slate-400 text-sm">{number}</span>
                 </div>
               ))}
             </div>
@@ -367,18 +367,23 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
         }
         
         @media (max-width: 768px) {
+          .board-container {
+            perspective: 1000px;
+          }
+          
           .board-wrapper {
-            transform: rotateX(5deg) rotateZ(-0.5deg);
+            transform: rotateX(3deg) rotateZ(-0.3deg);
           }
           
           .board-wrapper:hover {
-            transform: rotateX(3deg) rotateZ(-0.3deg);
+            transform: rotateX(2deg) rotateZ(-0.2deg);
           }
           
           .board-wrapper > div {
             box-shadow: 
-              0 20px 50px rgba(0, 0, 0, 0.5),
-              0 10px 25px rgba(124, 58, 237, 0.15);
+              0 15px 40px rgba(0, 0, 0, 0.4),
+              0 8px 20px rgba(124, 58, 237, 0.1);
+            border-width: 2px;
           }
         }
       `}</style>

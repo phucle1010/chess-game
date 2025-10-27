@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChessBoard3D } from "@/components/game/ChessBoard3D";
 import { PlayerCard } from "@/components/game/PlayerCard";
 import { ChatPanel } from "@/components/game/ChatPanel";
+import { ChatWidget } from "@/components/game/ChatWidget";
 import { MoveHistory } from "@/components/game/MoveHistory";
 import { PieceGuide } from "@/components/game/PieceGuide";
 import { GameStats } from "@/components/game/GameStats";
@@ -96,9 +97,9 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-4">
       {/* Header */}
-      <div className="max-w-[1800px] mx-auto mb-4">
+      <div className="max-w-[1800px] mx-auto mb-2 sm:mb-4">
         <div className="flex items-center justify-between">
           <Button
             onClick={() => router.push("/")}
@@ -131,21 +132,21 @@ export default function GamePage() {
 
       {/* Main Game Layout */}
       <div className="max-w-[1800px] mx-auto">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Left Sidebar - Chat & Move History */}
-          <div className="w-full xl:w-96 space-y-6">
+          <div className="w-full lg:w-80 xl:w-96 space-y-4 lg:space-y-6 order-2 lg:order-1">
             <div className="hidden xl:block">
               <ChatPanel />
             </div>
             <MoveHistory moves={moveHistory} />
-            <div className="grid md:grid-cols-1 gap-4">
+            <div className="grid gap-4">
               <PieceGuide />
               {/* <BoardLegend /> */}
             </div>
           </div>
 
           {/* Center - Chess Board */}
-          <div className="flex flex-col gap-6 xl:flex-1">
+          <div className="flex flex-col gap-4 lg:gap-6 lg:flex-1 order-1 lg:order-2 min-w-0">
             {/* Black Player */}
             <PlayerCard
               name="Opponent"
@@ -163,7 +164,7 @@ export default function GamePage() {
             />
 
             {/* Chess Board */}
-            <div className="flex justify-center px-4 py-8">
+            <div className="flex justify-center px-2 py-4 lg:px-4 lg:py-8">
               <ChessBoard3D
                 onMove={handleMove}
                 currentTurn={currentTurn}
@@ -182,13 +183,11 @@ export default function GamePage() {
               capturedPieces={whiteCaptured}
             />
           </div>
-
-          {/* Right Sidebar - Mobile Chat */}
-          <div className="xl:hidden">
-            <ChatPanel />
-          </div>
         </div>
       </div>
+
+      {/* Mobile Chat Widget */}
+      <ChatWidget />
 
       {/* Modals & Tooltips */}
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />

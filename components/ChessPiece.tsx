@@ -55,7 +55,7 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({ piece, position }) => {
       }`}
       data-color={piece.color}
     >
-      <span className="piece-symbol text-[clamp(2rem,6vw,3.5rem)] leading-none block">
+      <span className="piece-symbol text-[clamp(1.5rem,5vw,3.5rem)] leading-none block">
         {pieceSymbols[piece.color][piece.type]}
       </span>
 
