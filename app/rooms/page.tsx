@@ -127,7 +127,13 @@ export default function RoomsPage() {
             botDifficulty: result.room?.bot_difficulty,
           });
           setJoinDialogOpen(false);
-          toast.success(playWithBot ? "Starting bot game!" : "Joined room!");
+          if (playWithBot) {
+            toast.success(`Joined bot game (${botDifficulty} difficulty)!`);
+          } else {
+            toast.success(
+              `Successfully joined room: ${result.room?.name || "Game Room"}!`
+            );
+          }
           router.push(`/game?roomId=${selectedRoomId}`);
         },
         onError: (error: Error) => {

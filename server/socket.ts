@@ -7,6 +7,11 @@ interface SocketUser {
 }
 
 const users = new Map<string, SocketUser>();
+let ioInstance: SocketIOServer | null = null;
+
+export function getSocketIO(): SocketIOServer | null {
+  return ioInstance;
+}
 
 export function initializeSocket(server: HTTPServer) {
   const io = new SocketIOServer(server, {
@@ -141,5 +146,6 @@ export function initializeSocket(server: HTTPServer) {
     });
   });
 
+  ioInstance = io;
   return io;
 }

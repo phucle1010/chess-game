@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/actions/useAuth";
 import { useRoom, useRoomPlayers, useLeaveRoom } from "@/actions/useRooms";
@@ -60,6 +60,7 @@ function GamePageContent() {
   const [resultOpen, setResultOpen] = useState(false);
   const [gameResult, setGameResult] = useState<"win" | "lose" | "draw">("win");
   const [legalMovesCount, setLegalMovesCount] = useState(0);
+  const hasShownJoinToast = useRef<string | null>(null);
 
   const { resignDialogOpen, setResignDialogOpen, handleResign, confirmResign } =
     useResignGame({
@@ -82,6 +83,55 @@ function GamePageContent() {
       }
     };
   }, [user, socket]);
+
+  useEffect(() => {
+    if (!socket || !roomId || !user) return;
+
+    const handlePlayerJoinedNotification = (data: {
+      userId: string;
+      username: string;
+      roomId: string;
+    }) => {
+      // Don't show notification for yourself
+      if (data.userId !== user.id) {
+        toast.success(`${data.username} joined the room!`);
+      }
+    };
+
+    socket.on(
+      `room:player:joined:notification:${roomId}`,
+      handlePlayerJoinedNotification
+    );
+
+    return () => {
+      socket.off(
+        `room:player:joined:notification:${roomId}`,
+        handlePlayerJoinedNotification
+      );
+    };
+  }, [socket, roomId, user]);
+
+  useEffect(() => {
+    if (
+      room &&
+      user &&
+      players.length > 0 &&
+      room.id !== hasShownJoinToast.current
+    ) {
+      const isUserInRoom = players.some((p) => p.user_id === user.id);
+      if (isUserInRoom) {
+        hasShownJoinToast.current = room.id;
+        if (room.is_bot_room) {
+          toast.success(
+            `You're in the game room! Bot difficulty: ${room.bot_difficulty || "medium"}`
+          );
+        } else {
+          toast.success(`You're in the game room: ${room.name || "Game Room"}`);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room?.id, user?.id, players.length]);
 
   const handleMove = (from: [number, number], to: [number, number]) => {
     if (!chess || !game || !user) return;
