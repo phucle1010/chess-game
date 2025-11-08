@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/actions/useAuth";
 import { useRoom, useRoomPlayers, useLeaveRoom } from "@/actions/useRooms";
-import { useGameByRoom } from "@/actions/useGames";
+import { useGameByRoom, useUpdateGame } from "@/actions/useGames";
 import { useGameState } from "@/hooks/useGameState";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { useGameTimer } from "@/hooks/useGameTimer";
@@ -42,8 +42,9 @@ function GamePageContent() {
   const { data: players = [] } = useRoomPlayers(roomId);
   const { data: game } = useGameByRoom(roomId);
   const { mutate: leaveRoom } = useLeaveRoom();
+  const { mutate: updateGame } = useUpdateGame();
   const { socket } = useSocket();
-  const { chess, makeMove } = useGameState(roomId);
+  const { chess, makeMove } = useGameState(roomId, user?.id);
   const { messages, sendChatMessage } = useChatSocket(roomId);
   const { whiteTime, blackTime } = useGameTimer(game);
   const moveHistory = useMoveHistory(chess);
@@ -132,6 +133,110 @@ function GamePageContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.id, user?.id, players.length]);
+
+  // Auto-detect game end when player has no legal moves
+  useEffect(() => {
+    if (!chess || !game || !user || game.status === "finished") return;
+
+    // Check if current player has no legal moves
+    const moves = chess.moves();
+    if (moves.length === 0) {
+      // No legal moves available
+      const isInCheck = chess.isCheck();
+
+      if (isInCheck) {
+        // Checkmate - current player loses
+        const opponentId =
+          chess.turn() === "w" ? game.black_player_id : game.white_player_id;
+
+        // Update game to finished with winner
+        updateGame(
+          {
+            gameId: game.id,
+            data: {
+              status: "finished",
+              winner_id: opponentId,
+            },
+          },
+          {
+            onSuccess: () => {
+              // Emit game end event
+              if (socket) {
+                socket.emit("game:end", {
+                  roomId: roomId!,
+                  result: { winner_id: opponentId, reason: "checkmate" },
+                });
+              }
+            },
+          }
+        );
+      } else {
+        // Stalemate - draw
+        updateGame(
+          {
+            gameId: game.id,
+            data: {
+              status: "finished",
+              winner_id: null,
+            },
+          },
+          {
+            onSuccess: () => {
+              // Emit game end event
+              if (socket) {
+                socket.emit("game:end", {
+                  roomId: roomId!,
+                  result: { winner_id: null, reason: "stalemate" },
+                });
+              }
+            },
+          }
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    chess?.fen(),
+    game?.id,
+    game?.status,
+    game?.white_player_id,
+    game?.black_player_id,
+  ]);
+
+  // Auto-detect game end and show result modal
+  useEffect(() => {
+    if (!game || !user || !chess) return;
+
+    if (game.status === "finished" && !resultOpen) {
+      // Determine result for current user
+      let result: "win" | "lose" | "draw" = "draw";
+
+      if (game.winner_id === null) {
+        // Draw (stalemate or other draw condition)
+        result = "draw";
+      } else if (game.winner_id === user.id) {
+        // User won
+        result = "win";
+      } else if (game.is_bot_game && game.winner_id === null) {
+        // Bot won (winner_id is null for bot wins)
+        result = "lose";
+      } else {
+        // User lost to another player
+        result = "lose";
+      }
+
+      setGameResult(result);
+      setResultOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    game?.status,
+    game?.winner_id,
+    game?.is_bot_game,
+    user?.id,
+    chess,
+    resultOpen,
+  ]);
 
   const handleMove = (from: [number, number], to: [number, number]) => {
     if (!chess || !game || !user) return;
