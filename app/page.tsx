@@ -1,8 +1,8 @@
 "use client";
 
-import { Crown, Play, Trophy, Users } from "lucide-react";
+import { Crown, Play, Trophy, Users, LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import { useAuth, useSignOut } from "@/actions/useAuth";
 import {
   Card,
   CardContent,
@@ -14,9 +14,21 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const router = useRouter();
+  const { data: user } = useAuth();
+  const { mutate: signOut } = useSignOut();
 
-  const onNavigate = (page: "game" | "leaderboard") => {
+  const onNavigate = (
+    page: "game" | "leaderboard" | "rooms" | "auth/login"
+  ) => {
     router.push(page);
+  };
+
+  const handleSignOut = () => {
+    signOut(undefined, {
+      onSuccess: () => {
+        router.push("/");
+      },
+    });
   };
 
   return (
@@ -31,6 +43,24 @@ export default function Home() {
           <p className="text-purple-200 text-xl">
             Challenge players worldwide in the ultimate chess experience
           </p>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            {user ? (
+              <>
+                <span className="text-purple-200">
+                  Welcome, {user.username}!
+                </span>
+                <Button onClick={handleSignOut} variant="outline">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => onNavigate("auth/login")}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Main Content */}
@@ -50,7 +80,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <Button
-                onClick={() => onNavigate("game")}
+                onClick={() => onNavigate("rooms")}
                 className="w-full bg-violet-600 hover:bg-violet-700 text-white group-hover:scale-105 transition-transform"
               >
                 Start Game
@@ -73,7 +103,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <Button
-                onClick={() => onNavigate("game")}
+                onClick={() => onNavigate("rooms")}
                 variant="outline"
                 className="w-full bg-transparent border-white/30 text-white hover:bg-white/10 group-hover:scale-105 transition-transform"
               >
