@@ -60,8 +60,18 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   const Icon = config.icon;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-800 border-slate-700 text-white sm:max-w-[400px]">
+    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+      <DialogContent
+        className="bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl text-white sm:max-w-[400px] [&>button]:hidden"
+        onInteractOutside={(e) => {
+          // Prevent closing by clicking outside
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Prevent closing with Escape key
+          e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <div
             className={`flex justify-center mb-4 py-6 bg-gradient-to-br ${config.bgGradient} rounded-lg`}
@@ -95,17 +105,10 @@ export const ResultModal: React.FC<ResultModalProps> = ({
 
           {/* Actions */}
           <div className="space-y-2 pt-2">
-            <Button
-              onClick={onPlayAgain}
-              className="w-full bg-violet-600 hover:bg-violet-700"
-            >
+            <Button onClick={onPlayAgain} variant="gradient" className="w-full">
               Play Again
             </Button>
-            <Button
-              onClick={onBackToHome}
-              variant="outline"
-              className="w-full bg-transparent border-slate-600 text-slate-200 hover:bg-slate-700"
-            >
+            <Button onClick={onBackToHome} variant="dark" className="w-full">
               Back to Home
             </Button>
           </div>

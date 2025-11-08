@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import { ReactQueryProvider } from "@/lib/react-query/provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -87,7 +89,8 @@ export default function RootLayout({
       <body
         className={`${roboto.variable} antialiased bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950 `}
       >
-        {children}
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <Toaster />
         {/* Structured Data for SEO */}
         <script
           type="application/ld+json"

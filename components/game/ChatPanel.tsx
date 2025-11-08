@@ -1,8 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { Send } from "lucide-react";
-
-import { Message } from "@/types/chat";
-
+import { ChatMessage } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,32 +10,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatPanelProps {
   hideHeader?: boolean;
+  roomId: string | null;
+  messages: ChatMessage[];
+  onSendMessage: (message: string) => void;
+  userId: string;
 }
 
-export const ChatPanel: React.FC<ChatPanelProps> = ({ hideHeader = false }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "Opponent",
-      text: "Good luck!",
-      timestamp: new Date(),
-      isSelf: false,
-    },
-  ]);
+export const ChatPanel: React.FC<ChatPanelProps> = ({
+  hideHeader = false,
+  messages,
+  onSendMessage,
+  userId,
+}) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      sender: "You",
-      text: inputValue,
-      timestamp: new Date(),
-      isSelf: true,
-    };
-
-    setMessages([...messages, newMessage]);
+    onSendMessage(inputValue);
     setInputValue("");
   };
 
@@ -55,28 +46,34 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ hideHeader = false }) => {
       <CardContent className="flex-1 flex flex-col gap-3 p-4 pt-0">
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isSelf ? "justify-end" : "justify-start"}`}
-              >
+            {messages.map((message) => {
+              const isSelf = message.user_id === userId;
+              return (
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 ${
-                    message.isSelf
-                      ? "bg-violet-600 text-white"
-                      : "bg-slate-700 text-slate-100"
-                  }`}
+                  key={message.id}
+                  className={`flex ${isSelf ? "justify-end" : "justify-start"}`}
                 >
-                  <p className="text-sm">{message.text}</p>
-                  <p className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                      isSelf
+                        ? "bg-violet-600 text-white"
+                        : "bg-slate-700 text-slate-100"
+                    }`}
+                  >
+                    <p className="text-xs font-semibold mb-1 opacity-90">
+                      {message.user?.username || "Anonymous"}
+                    </p>
+                    <p className="text-sm">{message.message}</p>
+                    <p className="text-xs opacity-70 mt-1">
+                      {new Date(message.created_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </ScrollArea>
 

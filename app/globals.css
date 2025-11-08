@@ -212,3 +212,73 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Custom Toast Styles */
+@layer base {
+  [data-sonner-toaster] {
+    z-index: 100;
+  }
+
+  [data-sonner-toast] {
+    @apply rounded-lg border backdrop-blur-md shadow-lg transition-all duration-300;
+    @apply font-sans;
+  }
+
+  [data-sonner-toast][data-type="success"] {
+    @apply bg-emerald-600/95 border-emerald-500/50 text-white;
+    @apply shadow-emerald-500/20;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    @apply bg-red-600/95 border-red-500/50 text-white;
+    @apply shadow-red-500/20;
+  }
+
+  [data-sonner-toast][data-type="warning"] {
+    @apply bg-amber-600/95 border-amber-500/50 text-white;
+    @apply shadow-amber-500/20;
+  }
+
+  [data-sonner-toast][data-type="info"] {
+    @apply bg-blue-600/95 border-blue-500/50 text-white;
+    @apply shadow-blue-500/20;
+  }
+
+  [data-sonner-toast]:not([data-type]) {
+    @apply bg-slate-800/95 border-slate-700/50 text-white;
+    @apply shadow-violet-500/20;
+  }
+
+  [data-sonner-toast] [data-title] {
+    @apply font-semibold text-base;
+  }
+
+  [data-sonner-toast] [data-description] {
+    @apply text-sm text-slate-200/90 mt-1;
+  }
+
+  [data-sonner-toast] [data-icon] {
+    @apply flex-shrink-0;
+  }
+
+  [data-sonner-toast] [data-close-button] {
+    @apply text-slate-300 hover:text-white hover:bg-slate-700/50 rounded;
+    @apply transition-colors;
+  }
+
+  [data-sonner-toast][data-type="success"] [data-close-button] {
+    @apply text-emerald-100 hover:text-white hover:bg-emerald-700/50;
+  }
+
+  [data-sonner-toast][data-type="error"] [data-close-button] {
+    @apply text-red-100 hover:text-white hover:bg-red-700/50;
+  }
+
+  [data-sonner-toast][data-type="warning"] [data-close-button] {
+    @apply text-amber-100 hover:text-white hover:bg-amber-700/50;
+  }
+
+  [data-sonner-toast][data-type="info"] [data-close-button] {
+    @apply text-blue-100 hover:text-white hover:bg-blue-700/50;
+  }
+}

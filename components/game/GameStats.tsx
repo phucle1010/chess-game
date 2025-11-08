@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 interface GameStatsProps {
   legalMovesCount?: number;
   movesPlayed: number;
+  isActive?: boolean;
 }
 
 export const GameStats: React.FC<GameStatsProps> = ({
   legalMovesCount = 0,
   movesPlayed,
+  isActive = false,
 }) => {
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -45,9 +47,9 @@ export const GameStats: React.FC<GameStatsProps> = ({
             <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
             <div className="text-center">
               <p className="text-xl sm:text-2xl text-white">
-                {legalMovesCount > 0 ? "✓" : "-"}
+                {isActive ? "✓" : "-"}
               </p>
-              <p className="text-xs text-slate-400">Active</p>
+              <p className="text-xs text-slate-400">Your Turn</p>
             </div>
           </div>
         </CardContent>

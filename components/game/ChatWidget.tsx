@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 import { MessageCircle, X, Minus } from "lucide-react";
-
+import { ChatMessage } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-
 import { ChatPanel } from "./ChatPanel";
 
-export const ChatWidget: React.FC = () => {
+interface ChatWidgetProps {
+  roomId: string;
+  messages: ChatMessage[];
+  onSendMessage: (message: string) => void;
+  userId: string;
+}
+
+export const ChatWidget: React.FC<ChatWidgetProps> = ({
+  roomId,
+  messages,
+  onSendMessage,
+  userId,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,9 +35,9 @@ export const ChatWidget: React.FC = () => {
         ) : (
           <MessageCircle className="h-6 w-6" />
         )}
-        {!isOpen && (
+        {!isOpen && messages.length > 0 && (
           <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-            1
+            {messages.length}
           </span>
         )}
       </Button>
@@ -75,7 +86,13 @@ export const ChatWidget: React.FC = () => {
 
           {/* Chat Content */}
           <div className="h-[calc(70vh-80px)] overflow-hidden">
-            <ChatPanel hideHeader={true} />
+            <ChatPanel
+              hideHeader={true}
+              roomId={roomId}
+              messages={messages}
+              onSendMessage={onSendMessage}
+              userId={userId}
+            />
           </div>
         </div>
       </div>

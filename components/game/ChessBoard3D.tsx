@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Chess, Square } from "chess.js";
 
 import { Board, Piece, PieceColor } from "@/types/chess-piece";
 
@@ -39,6 +40,8 @@ interface ChessBoard3DProps {
   currentTurn: PieceColor;
   onCapture?: (piece: Piece) => void;
   onLegalMovesChange?: (count: number) => void;
+  fen?: string; // FEN string to sync board state
+  chess?: Chess | null; // Chess.js instance for accurate legal moves
 }
 
 export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
@@ -46,12 +49,126 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
   currentTurn,
   onCapture,
   onLegalMovesChange,
+  fen,
+  chess,
 }) => {
-  const [board, setBoard] = useState<Board>(initialBoard);
+  // Convert FEN to board state
+  const fenToBoard = (fenString: string | null | undefined): Board => {
+    const board: Board = Array(8)
+      .fill(null)
+      .map(() => Array(8).fill(null));
+
+    if (!fenString || fenString === null || fenString === undefined)
+      return initialBoard;
+
+    const parts = fenString.split(" ");
+    const position = parts[0]; // Get the position part of FEN
+
+    let row = 0;
+    let col = 0;
+
+    for (const char of position) {
+      if (char === "/") {
+        row++;
+        col = 0;
+      } else if (char >= "1" && char <= "8") {
+        // Empty squares
+        col += parseInt(char);
+      } else {
+        // Piece
+        const isWhite = char === char.toUpperCase();
+        const color: PieceColor = isWhite ? "white" : "black";
+        const pieceChar = char.toLowerCase();
+
+        let type: Piece["type"];
+        switch (pieceChar) {
+          case "p":
+            type = "pawn";
+            break;
+          case "r":
+            type = "rook";
+            break;
+          case "n":
+            type = "knight";
+            break;
+          case "b":
+            type = "bishop";
+            break;
+          case "q":
+            type = "queen";
+            break;
+          case "k":
+            type = "king";
+            break;
+          default:
+            col++;
+            continue;
+        }
+
+        if (row < 8 && col < 8) {
+          board[row][col] = { type, color };
+        }
+        col++;
+      }
+    }
+
+    return board;
+  };
+
+  // Initialize board from FEN or use initial board
+  const initialBoardFromFen = useMemo(() => {
+    if (fen) {
+      try {
+        return fenToBoard(fen);
+      } catch (error) {
+        console.error("Error parsing FEN:", error);
+        return initialBoard;
+      }
+    }
+    return initialBoard;
+  }, [fen]); // Re-compute when fen changes
+
+  const [board, setBoard] = useState<Board>(initialBoardFromFen);
   const [selectedSquare, setSelectedSquare] = useState<[number, number] | null>(
     null
   );
   const [legalMoves, setLegalMoves] = useState<[number, number][]>([]);
+
+  // Reset board when initial board changes (e.g., when joining a new room)
+  useEffect(() => {
+    setBoard(initialBoardFromFen);
+    setSelectedSquare(null);
+    setLegalMoves([]);
+    if (onLegalMovesChange) {
+      onLegalMovesChange(0);
+    }
+  }, [initialBoardFromFen, onLegalMovesChange]);
+
+  // Sync board with FEN prop changes (for bot moves and external updates)
+  useEffect(() => {
+    if (fen) {
+      try {
+        const newBoard = fenToBoard(fen);
+        setBoard(newBoard);
+        // Clear selection when board updates from external source (like bot moves)
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        if (onLegalMovesChange) {
+          onLegalMovesChange(0);
+        }
+      } catch (error) {
+        console.error("Error updating board from FEN:", error);
+      }
+    } else {
+      // Reset to initial board when FEN is null/undefined (game deleted)
+      setBoard(initialBoard);
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      if (onLegalMovesChange) {
+        onLegalMovesChange(0);
+      }
+    }
+  }, [fen, onLegalMovesChange]);
 
   const makeMove = (to: [number, number]) => {
     if (!selectedSquare) return;
@@ -89,12 +206,36 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     }
   };
 
-  // Calculate all legal moves for a piece
+  // Calculate all legal moves for a piece using chess.js if available
   const calculateLegalMoves = (from: [number, number]): [number, number][] => {
     const [fromRow, fromCol] = from;
     const piece = board[fromRow][fromCol];
     if (!piece) return [];
 
+    // Use chess.js for accurate legal moves if available
+    if (chess) {
+      try {
+        // Convert board coordinates to chess notation
+        const fromSquare =
+          `${String.fromCharCode(97 + fromCol)}${8 - fromRow}` as Square;
+
+        // Get legal moves from chess.js
+        const legalMoves = chess.moves({ square: fromSquare, verbose: true });
+
+        // Convert chess notation back to board coordinates
+        return legalMoves.map((move) => {
+          const toSquare = move.to;
+          const col = toSquare.charCodeAt(0) - 97;
+          const row = 8 - parseInt(toSquare[1]);
+          return [row, col] as [number, number];
+        });
+      } catch (error) {
+        console.error("Error calculating legal moves with chess.js:", error);
+        // Fallback to manual calculation
+      }
+    }
+
+    // Fallback: manual calculation using isValidMove
     const moves: [number, number][] = [];
 
     for (let row = 0; row < 8; row++) {
@@ -133,7 +274,30 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
       }
     } else if (selectedSquare) {
       // If a piece is selected, try to move to clicked square
-      makeMove(position);
+      // Validate with chess.js if available
+      if (chess) {
+        try {
+          const [fromRow, fromCol] = selectedSquare;
+          const fromSquare =
+            `${String.fromCharCode(97 + fromCol)}${8 - fromRow}` as Square;
+          const toSquare = `${String.fromCharCode(97 + col)}${8 - row}`;
+
+          // Check if move is legal in chess.js
+          const legalMoves = chess.moves({ square: fromSquare, verbose: true });
+          const isLegal = legalMoves.some((move) => move.to === toSquare);
+
+          if (isLegal) {
+            makeMove(position);
+          }
+        } catch (error) {
+          console.error("Error validating move with chess.js:", error);
+          // Fallback to manual validation
+          makeMove(position);
+        }
+      } else {
+        // Fallback to manual validation
+        makeMove(position);
+      }
     } else {
       // Clear selection
       setSelectedSquare(null);

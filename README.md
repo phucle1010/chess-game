@@ -1,110 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chess Game - Multiplayer Online Chess
 
-## Getting Started
+A full-featured multiplayer chess game built with Next.js, Supabase, React Query, and Socket.io.
 
-### Prerequisites
+## 🚀 Quick Start
 
-- Node.js 18+
-- npm, yarn, pnpm, or bun
-
-### Installation
+### 1. Install Dependencies
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Run development server
+### 2. Set Up Environment Variables
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+PORT=3000
+```
+
+### 3. Set Up Database
+
+Run `lib/supabase/migrations.sql` in your Supabase SQL Editor.
+
+### 4. Run the Application
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**That's it!** This single command runs both:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- ✅ Next.js client (pages, API routes)
+- ✅ Socket.io server (real-time features)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Development
+## 📚 Documentation
 
-### Code Quality Tools
+- **[RUNNING.md](./RUNNING.md)** - Detailed guide on running the project
+- **[SETUP.md](./SETUP.md)** - Complete setup and configuration guide
 
-This project uses several tools to maintain code quality:
+## 🎮 Features
 
-- **ESLint**: Code linting and quality checks
-- **Prettier**: Code formatting
-- **Husky**: Git hooks for pre-commit and commit message validation
-- **lint-staged**: Run linters on staged files
+- ✅ User authentication (register, login, password reset)
+- ✅ Real-time multiplayer chess games
+- ✅ Room-based game system
+- ✅ Real-time chat
+- ✅ User ratings and statistics
+- ✅ Leaderboard
 
-### Available Scripts
+## 🏗️ Architecture
 
-```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
+The application uses a **custom Next.js server** that integrates:
 
-# Code Quality
-npm run lint         # Run ESLint
-npm run lint:fix     # Run ESLint with auto-fix
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
-```
+- Next.js App Router for pages and API routes
+- Socket.io for real-time communication
+- Both running on the same HTTP server
 
-### Git Hooks
+## 📝 Available Scripts
 
-The project uses Husky to enforce code quality:
+| Command          | Description                                    |
+| ---------------- | ---------------------------------------------- |
+| `npm run dev`    | Start development server (Next.js + Socket.io) |
+| `npm run build`  | Build for production                           |
+| `npm start`      | Start production server                        |
+| `npm run lint`   | Run ESLint                                     |
+| `npm run format` | Format code with Prettier                      |
 
-- **Pre-commit**: Runs lint-staged to check and fix staged files
-- **Commit-msg**: Validates commit messages using Conventional Commits format
+## 🔧 Tech Stack
 
-#### Commit Message Format
+- **Framework:** Next.js 16 (App Router)
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **State Management:** React Query (@tanstack/react-query)
+- **Real-time:** Socket.io
+- **Chess Engine:** chess.js
+- **UI:** shadcn/ui + Tailwind CSS
+- **Type Safety:** TypeScript
 
-Use the following format for commit messages:
-
-```
-<type>(<scope>): <subject>
-
-[optional body]
-
-[optional footer]
-```
-
-**Types:**
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `perf`: Performance improvements
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-- `build`: Build system changes
-- `ci`: CI/CD changes
-
-**Examples:**
+## 📖 Project Structure
 
 ```
-feat: add chess board component
-fix: resolve drag and drop issue
-docs: update README
-refactor: improve move validation logic
+├── app/              # Next.js pages and API routes
+├── actions/          # React Query hooks
+├── services/         # API service functions
+├── hooks/            # Custom React hooks
+├── components/       # React components
+├── lib/              # Configurations
+├── server/           # Custom server with Socket.io
+└── types/            # TypeScript types
 ```
 
-### Editor Configuration
+## 🐛 Troubleshooting
 
-The project includes `.editorconfig` for consistent code style across different editors.
+See [RUNNING.md](./RUNNING.md) for detailed troubleshooting guide.
 
-## Learn More
+## 📄 License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private project
