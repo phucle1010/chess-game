@@ -1,6 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  Plus,
+  Users,
+  Play,
+  Bot,
+  Trash2,
+  Loader2,
+  ArrowLeft,
+} from "lucide-react";
+
 import {
   useRooms,
   useCreateRoom,
@@ -8,6 +20,7 @@ import {
   useDeleteRoom,
 } from "@/actions/useRooms";
 import { useAuth } from "@/actions/useAuth";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,9 +30,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Plus, Users, Play, Bot, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -51,9 +61,9 @@ export default function RoomsPage() {
   const router = useRouter();
   const { data: user } = useAuth();
   const { data: rooms = [], isLoading } = useRooms();
-  const { mutate: createRoom } = useCreateRoom();
-  const { mutate: joinRoom } = useJoinRoom();
-  const { mutate: deleteRoom } = useDeleteRoom();
+  const { mutate: createRoom, isPending: isCreatingRoom } = useCreateRoom();
+  const { mutate: joinRoom, isPending: isJoiningRoom } = useJoinRoom();
+  const { mutate: deleteRoom, isPending: isDeletingRoom } = useDeleteRoom();
   const [roomName, setRoomName] = useState("");
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -171,6 +181,14 @@ export default function RoomsPage() {
     <div className="min-h-screen p-4 bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
+          <Button
+            onClick={() => router.push("/")}
+            variant="ghost"
+            className="text-purple-200 hover:text-white hover:bg-white/10 mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
           <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">
             Chess Rooms
           </h1>
@@ -187,16 +205,62 @@ export default function RoomsPage() {
                   onChange={(e) => setRoomName(e.target.value)}
                 />
               </div>
-              <Button onClick={handleCreateRoom} variant="gradient">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Room
+              <Button
+                onClick={handleCreateRoom}
+                variant="gradient"
+                disabled={isCreatingRoom}
+              >
+                {isCreatingRoom ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Room
+                  </>
+                )}
               </Button>
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-white">Loading rooms...</div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, index) => (
+              <Card
+                key={index}
+                className="bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-xl animate-pulse"
+              >
+                <CardHeader>
+                  <div className="h-6 bg-slate-700/50 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-slate-700/30 rounded w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="h-10 bg-slate-700/40 rounded w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : rooms.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4">
+            <div className="bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl rounded-2xl p-12 max-w-md w-full text-center">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="p-4 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg">
+                  <Users className="h-12 w-12 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-white">
+                    No Rooms Available
+                  </h3>
+                  <p className="text-slate-400">
+                    Be the first to create a room and start playing!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {rooms.map((room) => (
@@ -424,9 +488,22 @@ export default function RoomsPage() {
             <Button variant="dark" onClick={() => setJoinDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleJoinRoom} variant="gradient">
-              <Play className="mr-2 h-4 w-4" />
-              Join Room
+            <Button
+              onClick={handleJoinRoom}
+              variant="gradient"
+              disabled={isJoiningRoom}
+            >
+              {isJoiningRoom ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Joining...
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Join Room
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -468,8 +545,16 @@ export default function RoomsPage() {
                 }
               }}
               className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeletingRoom}
             >
-              Delete
+              {isDeletingRoom ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
