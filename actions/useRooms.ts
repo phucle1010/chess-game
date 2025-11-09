@@ -150,7 +150,12 @@ export function useDeleteRoom() {
     onSuccess: (_, variables) => {
       // Remove room from cache
       queryClient.removeQueries({ queryKey: ["rooms", variables.roomId] });
+      queryClient.removeQueries({
+        queryKey: ["rooms", variables.roomId, "players"],
+      });
+      // Invalidate and refetch rooms list
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.refetchQueries({ queryKey: ["rooms"] });
     },
   });
 }

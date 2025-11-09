@@ -1,6 +1,8 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { Room, RoomPlayer } from "@/types/database";
 
+import { gameService } from "./game.service";
+
 export interface CreateRoomData {
   name: string;
   host_id: string;
@@ -309,23 +311,53 @@ export const roomService = {
       );
     }
 
-    // Delete associated game if exists
-    if (room.game_id) {
-      const { gameService } = await import("./game.service");
-      try {
-        await gameService.deleteGame(room.game_id);
-      } catch (error) {
-        console.error("Error deleting game when deleting room:", error);
-        // Continue with room deletion even if game deletion fails
-      }
+    // Delete all games associated with this room
+    try {
+      await gameService.deleteGameByRoom(roomId);
+    } catch (error) {
+      console.error("Error deleting games when deleting room:", error);
+      // Continue with room deletion even if game deletion fails
     }
 
     // Delete all room players (should be empty, but clean up anyway)
-    await supabase.from("room_players").delete().eq("room_id", roomId);
+    const { error: playersError } = await supabase
+      .from("room_players")
+      .delete()
+      .eq("room_id", roomId);
+
+    if (playersError) {
+      console.error("Error deleting room players:", playersError);
+      // Continue with room deletion
+    }
+
+    // Delete all chat messages for this room
+    const { error: chatError } = await supabase
+      .from("chat_messages")
+      .delete()
+      .eq("room_id", roomId);
+
+    if (chatError) {
+      console.error("Error deleting chat messages:", chatError);
+      // Continue with room deletion
+    }
 
     // Delete the room
-    const { error } = await supabase.from("rooms").delete().eq("id", roomId);
+    const { error, data } = await supabase
+      .from("rooms")
+      .delete()
+      .eq("id", roomId)
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error deleting room:", error);
+      throw error;
+    }
+
+    // Verify deletion
+    if (!data || data.length === 0) {
+      throw new Error(
+        "Room was not deleted. It may not exist or you may not have permission."
+      );
+    }
   },
 };
