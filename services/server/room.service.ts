@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { Room, RoomPlayer } from "@/types/database";
+import { ValidationError } from "@/lib/errors";
 
 import { gameService } from "./game.service";
 
@@ -14,10 +15,30 @@ export interface CreateRoomData {
 export const roomService = {
   async createRoom(data: CreateRoomData): Promise<Room> {
     const supabase = await createServerClient();
+
+    // Check if a room with the same name already exists (only for active/waiting rooms)
+    // Case-insensitive check to prevent duplicates like "My Room" and "my room"
+    const trimmedName = data.name.trim();
+    const { data: existingRooms, error: checkError } = await supabase
+      .from("rooms")
+      .select("id, name, status")
+      .ilike("name", trimmedName)
+      .in("status", ["waiting", "active"]);
+
+    if (checkError) {
+      throw new Error("Failed to validate room name");
+    }
+
+    if (existingRooms && existingRooms.length > 0) {
+      throw new ValidationError(
+        `A room with the name "${data.name}" already exists. Please choose a different name.`
+      );
+    }
+
     const { data: room, error } = await supabase
       .from("rooms")
       .insert({
-        name: data.name,
+        name: data.name.trim(),
         host_id: data.host_id,
         max_players: data.is_bot_room ? 1 : data.max_players || 2,
         current_players: 1,

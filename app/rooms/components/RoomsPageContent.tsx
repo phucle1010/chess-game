@@ -66,9 +66,6 @@ export function RoomsPageContent() {
           toast.success("Room created!");
           setRoomName("");
         },
-        onError: (error: Error) => {
-          toast.error(error.message || "Failed to create room");
-        },
       }
     );
   };
@@ -102,9 +99,6 @@ export function RoomsPageContent() {
           }
           router.push(`/game?roomId=${selectedRoomId}`);
         },
-        onError: (error: Error) => {
-          toast.error(error.message || "Failed to join room");
-        },
       }
     );
   };
@@ -119,9 +113,6 @@ export function RoomsPageContent() {
           toast.success("Room deleted successfully");
           setDeleteDialogOpen(false);
           setRoomToDelete(null);
-        },
-        onError: (error: Error) => {
-          toast.error(error.message || "Failed to delete room");
         },
       }
     );
