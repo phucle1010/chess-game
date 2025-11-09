@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 
-import { ReactQueryProvider } from "@/lib/react-query/provider";
-import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ReactQueryProvider, AuthProvider } from "@/providers";
 
 import { Toaster } from "@/components/ui/sonner";
 
