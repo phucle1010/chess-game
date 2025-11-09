@@ -19,6 +19,14 @@ export function useUsers(limit?: number) {
   });
 }
 
+export function useTopPlayers(limit: number = 100) {
+  return useQuery({
+    queryKey: ["users", "top", limit],
+    queryFn: () => userService.getUsers(limit),
+    staleTime: 30000, // Cache for 30 seconds
+  });
+}
+
 export function useUpdateUser() {
   const queryClient = useQueryClient();
 

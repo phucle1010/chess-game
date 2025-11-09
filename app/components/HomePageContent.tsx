@@ -2,6 +2,7 @@
 
 import { Crown, Play, Trophy, Users, LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import { useAuth, useSignOut } from "@/actions/useAuth";
 import {
@@ -12,11 +13,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { UserStatistics } from "@/components/home/UserStatistics";
 
 export function HomePageContent() {
   const router = useRouter();
   const { data: user } = useAuth();
   const { mutate: signOut } = useSignOut();
+
+  const stats = useMemo(() => {
+    if (!user) return null;
+    const totalGames =
+      (user.wins || 0) + (user.losses || 0) + (user.draws || 0);
+    const winRate = totalGames > 0 ? ((user.wins || 0) / totalGames) * 100 : 0;
+    return {
+      rating: user.rating || 0,
+      wins: user.wins || 0,
+      losses: user.losses || 0,
+      draws: user.draws || 0,
+      totalGames,
+      winRate: Math.round(winRate * 10) / 10,
+    };
+  }, [user]);
 
   const onNavigate = (
     page: "game" | "leaderboard" | "rooms" | "auth/login"
@@ -62,6 +79,8 @@ export function HomePageContent() {
             )}
           </div>
         </div>
+
+        {user && stats && <UserStatistics stats={stats} />}
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 transition-all cursor-pointer group">
