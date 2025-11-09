@@ -9,8 +9,7 @@ export function useRooms() {
   return useQuery({
     queryKey: ["rooms"],
     queryFn: () => roomService.getRooms(),
-    // No polling - rely on cache invalidation when rooms change
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 30000,
   });
 }
 
@@ -19,8 +18,7 @@ export function useRoom(roomId: string | null) {
     queryKey: ["rooms", roomId],
     queryFn: () => (roomId ? roomService.getRoom(roomId) : null),
     enabled: !!roomId,
-    // No polling - rely on socket events and cache updates
-    staleTime: 10000, // Consider data fresh for 10 seconds
+    staleTime: 10000,
   });
 }
 
@@ -29,8 +27,7 @@ export function useRoomPlayers(roomId: string | null) {
     queryKey: ["rooms", roomId, "players"],
     queryFn: () => (roomId ? roomService.getRoomPlayers(roomId) : []),
     enabled: !!roomId,
-    // No polling - rely on socket events and cache updates
-    staleTime: 10000, // Consider data fresh for 10 seconds
+    staleTime: 10000,
   });
 }
 

@@ -1,24 +1,31 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Chess Leaderboard | Chess Master",
+  title: "Chess Leaderboard | Top Players & Rankings | Chess Master",
   description:
-    "See the top chess players on the Chess Master global leaderboard.",
+    "View the global chess leaderboard and see top-ranked players worldwide. Track ratings, wins, losses, and compete to become the #1 Chess Master. See where you rank among the best.",
   keywords: [
     "chess leaderboard",
-    "chess ratings",
+    "chess rankings",
     "top chess players",
-    "online chess",
-    "play chess",
-    "chess game",
-    "ranking",
+    "chess ratings",
+    "chess tournament",
+    "chess competition",
+    "best chess players",
+    "chess statistics",
+    "global chess leaderboard",
     "Chess Master",
   ],
+  authors: [
+    { name: "Chess Master Team", url: process.env.NEXT_PUBLIC_APP_URL! },
+  ],
+  creator: "Chess Master Team",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
   openGraph: {
-    title: "Chess Leaderboard | Chess Master",
+    title: "Chess Leaderboard | Top Players & Rankings | Chess Master",
     description:
-      "View global, friends, and country chess rankings. Check out top chess players and their stats.",
-    url: "https://your-domain.com/leaderboard",
+      "View the global chess leaderboard and see top-ranked players worldwide. Track your progress and compete to become the #1 Chess Master.",
+    url: `${process.env.NEXT_PUBLIC_APP_URL}/leaderboard`,
     siteName: "Chess Master",
     type: "website",
     images: [
@@ -26,16 +33,34 @@ export const metadata: Metadata = {
         url: "/og/leaderboard.png",
         width: 1200,
         height: 630,
-        alt: "Chess Master leaderboard preview",
+        alt: "Chess Master global leaderboard",
       },
     ],
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chess Leaderboard | Chess Master",
-    description: "See the top chess players and their ratings on Chess Master.",
+    title: "Chess Leaderboard | Top Players & Rankings",
+    description:
+      "View the global chess leaderboard and see top-ranked players. Track your progress and compete to become #1.",
     images: ["/og/leaderboard.png"],
+    creator: "@chessmasterteam",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL}/leaderboard`,
+  },
+  category: "Games",
 };
 
 export default function LeaderboardLayout({
@@ -43,5 +68,5 @@ export default function LeaderboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-[100dvh] w-full">{children}</div>;
+  return <>{children}</>;
 }

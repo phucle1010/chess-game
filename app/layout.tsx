@@ -77,6 +77,10 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_APP_URL,
+  },
+  category: "Games",
 };
 
 export default function RootLayout({
@@ -87,7 +91,6 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <head>
-        {/* SEO Enhancements */}
         <meta name="theme-color" content="#4f46e5" />
         <link rel="canonical" href="https://your-domain.com/" />
       </head>
@@ -98,7 +101,6 @@ export default function RootLayout({
           <AuthProvider>{children}</AuthProvider>
         </ReactQueryProvider>
         <Toaster />
-        {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

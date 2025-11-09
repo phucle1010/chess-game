@@ -1,56 +1,9 @@
-"use client";
-
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useSignIn } from "@/actions/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { toast } from "sonner";
+import { Suspense } from "react";
 import { Crown } from "lucide-react";
 
-function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { mutate: signIn, isPending } = useSignIn();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+import { LoginForm } from "./components/LoginForm";
 
-  useEffect(() => {
-    // Check for redirect parameter
-    const redirect = searchParams.get("redirect");
-    if (redirect) {
-      // Store redirect in sessionStorage for after login
-      sessionStorage.setItem("redirectAfterLogin", redirect);
-    }
-  }, [searchParams]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-    signIn(
-      { email, password },
-      {
-        onSuccess: () => {
-          toast.success("Logged in successfully!");
-          sessionStorage.removeItem("redirectAfterLogin");
-          router.push(redirectPath);
-        },
-        onError: (error: Error) => {
-          toast.error(error.message || "Failed to login");
-        },
-      }
-    );
-  };
-
+function LoginLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950 relative overflow-hidden">
       {/* 3D Background Effects */}
@@ -60,94 +13,42 @@ function LoginForm() {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse delay-2000" />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl">
-        <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg">
-              <Crown className="h-8 w-8 text-white" />
+      {/* Loading Card */}
+      <div className="relative z-10 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl rounded-2xl p-12 max-w-md w-full">
+        <div className="flex flex-col items-center justify-center space-y-6">
+          {/* Crown Icon with Gradient Background */}
+          <div className="relative">
+            <div className="p-4 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg animate-pulse">
+              <Crown className="h-12 w-12 text-white" />
             </div>
+            {/* Spinning Ring */}
+            <div className="absolute inset-0 rounded-full border-4 border-purple-500/30 border-t-purple-400 animate-spin" />
           </div>
-          <CardTitle className="text-3xl font-bold text-center text-white">
-            Welcome Back
-          </CardTitle>
-          <CardDescription className="text-center text-slate-400">
-            Enter your credentials to continue your chess journey
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500 focus:ring-purple-500/20"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-300">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500 focus:ring-purple-500/20"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin">⏳</span>
-                  Logging in...
-                </span>
-              ) : (
-                "Login"
-              )}
-            </Button>
-          </form>
-          <div className="mt-6 space-y-3 text-center">
-            <Link
-              href="/auth/register"
-              className="block text-sm text-purple-400 hover:text-purple-300 transition-colors hover:underline"
-            >
-              Don&apos;t have an account?{" "}
-              <span className="font-semibold">Register now</span>
-            </Link>
-            <Link
-              href="/auth/reset-password"
-              className="block text-sm text-slate-400 hover:text-slate-300 transition-colors hover:underline"
-            >
-              Forgot password?
-            </Link>
+
+          {/* Loading Dots Animation */}
+          <div className="flex items-center space-x-2">
+            <div
+              className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            />
+            <div
+              className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+              style={{ animationDelay: "150ms" }}
+            />
+            <div
+              className="w-2 h-2 bg-violet-400 rounded-full animate-bounce"
+              style={{ animationDelay: "300ms" }}
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950">
-          <div className="text-white">Loading...</div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoginLoading />}>
       <LoginForm />
     </Suspense>
   );
