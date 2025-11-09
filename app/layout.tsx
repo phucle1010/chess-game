@@ -4,6 +4,8 @@ import { Roboto } from "next/font/google";
 import { ReactQueryProvider, AuthProvider } from "@/providers";
 
 import { Toaster } from "@/components/ui/sonner";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 import "./globals.css";
 
@@ -71,11 +73,25 @@ export const metadata: Metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/icons/icon-192x192.png",
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Chess Master",
   },
   alternates: {
     canonical: process.env.NEXT_PUBLIC_APP_URL,
@@ -92,7 +108,12 @@ export default function RootLayout({
     <html lang="en" dir="ltr">
       <head>
         <meta name="theme-color" content="#4f46e5" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Chess Master" />
         <link rel="canonical" href="https://your-domain.com/" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className={`${roboto.variable} antialiased bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950 `}
@@ -101,6 +122,8 @@ export default function RootLayout({
           <AuthProvider>{children}</AuthProvider>
         </ReactQueryProvider>
         <Toaster />
+        <ServiceWorkerRegistration />
+        <InstallPrompt />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
