@@ -264,6 +264,20 @@ export const ChessBoard3D: React.FC<ChessBoard3DProps> = ({
     const [row, col] = position;
     const piece = board[row][col];
 
+    // Check if clicking on the same square that's already selected (toggle off)
+    if (
+      selectedSquare &&
+      selectedSquare[0] === row &&
+      selectedSquare[1] === col
+    ) {
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      if (onLegalMovesChange) {
+        onLegalMovesChange(0);
+      }
+      return;
+    }
+
     // If clicking on own piece, select it and show legal moves
     if (piece && piece.color === currentTurn) {
       setSelectedSquare(position);

@@ -41,7 +41,7 @@ export const roomService = {
         name: data.name.trim(),
         host_id: data.host_id,
         max_players: data.is_bot_room ? 1 : data.max_players || 2,
-        current_players: 1,
+        current_players: 0,
         status: "waiting",
         is_bot_room: data.is_bot_room || false,
         bot_difficulty: data.bot_difficulty || null,
@@ -51,9 +51,7 @@ export const roomService = {
 
     if (error) throw error;
 
-    // Add host as player
-    await this.joinRoom(room.id, data.host_id);
-
+    // Room is created empty, host needs to join explicitly
     return room;
   },
 
