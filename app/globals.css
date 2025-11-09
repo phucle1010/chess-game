@@ -220,65 +220,217 @@ html {
   }
 
   [data-sonner-toast] {
-    @apply rounded-lg border backdrop-blur-md shadow-lg transition-all duration-300;
-    @apply font-sans;
+    @apply rounded-2xl border backdrop-blur-xl shadow-2xl;
+    @apply font-sans overflow-hidden;
+    @apply transform-gpu;
+    @apply px-6 py-4;
+    animation: toastSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    position: relative;
+    min-width: 320px;
+    max-width: 420px;
+    will-change: transform, opacity;
+  }
+
+  [data-sonner-toast]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
+    animation: shimmer 2.5s ease-in-out infinite;
+    border-radius: 2rem 2rem 0 0;
+    opacity: 0;
+    animation-delay: 0.3s;
+  }
+
+  [data-sonner-toast]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 2rem;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    animation: borderGlow 0.6s ease-out 0.2s forwards;
+  }
+
+  @keyframes toastSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-120%) scale(0.9) rotateX(-10deg);
+      filter: blur(8px);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(10px) scale(1.02) rotateX(2deg);
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0deg);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes borderGlow {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Exit animation */
+  [data-sonner-toast][data-removed="true"] {
+    animation: toastSlideOut 0.35s cubic-bezier(0.55, 0.055, 0.675, 0.19)
+      forwards;
+  }
+
+  @keyframes toastSlideOut {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-50px) scale(0.95);
+      filter: blur(4px);
+    }
   }
 
   [data-sonner-toast][data-type="success"] {
-    @apply bg-emerald-600/95 border-emerald-500/50 text-white;
-    @apply shadow-emerald-500/20;
+    @apply bg-gradient-to-br from-emerald-600/95 via-emerald-500/90 to-emerald-600/95;
+    @apply border-emerald-400/50 text-white;
+    @apply shadow-emerald-500/40 ring-1 ring-emerald-400/30;
   }
 
   [data-sonner-toast][data-type="error"] {
-    @apply bg-red-600/95 border-red-500/50 text-white;
-    @apply shadow-red-500/20;
+    @apply bg-gradient-to-br from-red-600/95 via-red-500/90 to-red-600/95;
+    @apply border-red-400/50 text-white;
+    @apply shadow-red-500/40 ring-1 ring-red-400/30;
   }
 
   [data-sonner-toast][data-type="warning"] {
-    @apply bg-amber-600/95 border-amber-500/50 text-white;
-    @apply shadow-amber-500/20;
+    @apply bg-gradient-to-br from-amber-600/95 via-amber-500/90 to-amber-600/95;
+    @apply border-amber-400/50 text-white;
+    @apply shadow-amber-500/40 ring-1 ring-amber-400/30;
   }
 
   [data-sonner-toast][data-type="info"] {
-    @apply bg-blue-600/95 border-blue-500/50 text-white;
-    @apply shadow-blue-500/20;
+    @apply bg-gradient-to-br from-blue-600/95 via-indigo-500/90 to-blue-600/95;
+    @apply border-blue-400/50 text-white;
+    @apply shadow-blue-500/40 ring-1 ring-blue-400/30;
   }
 
   [data-sonner-toast]:not([data-type]) {
-    @apply bg-slate-800/95 border-slate-700/50 text-white;
-    @apply shadow-violet-500/20;
+    @apply bg-gradient-to-br from-slate-900/98 via-slate-800/95 to-slate-900/98;
+    @apply border-slate-700/50 text-white;
+    @apply shadow-violet-500/30 ring-1 ring-violet-500/20;
   }
 
   [data-sonner-toast] [data-title] {
-    @apply font-semibold text-base;
+    @apply font-bold text-lg tracking-tight;
+    @apply drop-shadow-md;
+    @apply mb-1;
   }
 
   [data-sonner-toast] [data-description] {
-    @apply text-sm text-slate-200/90 mt-1;
+    @apply text-sm text-slate-200/95;
+    @apply leading-relaxed;
+    @apply font-medium;
   }
 
+  /* Hide icons */
   [data-sonner-toast] [data-icon] {
-    @apply flex-shrink-0;
+    display: none !important;
   }
 
+  /* Hide close button */
   [data-sonner-toast] [data-close-button] {
-    @apply text-slate-300 hover:text-white hover:bg-slate-700/50 rounded;
-    @apply transition-colors;
+    display: none !important;
   }
 
-  [data-sonner-toast][data-type="success"] [data-close-button] {
-    @apply text-emerald-100 hover:text-white hover:bg-emerald-700/50;
+  /* Hover effects */
+  [data-sonner-toast]:hover {
+    @apply scale-[1.02] shadow-2xl;
+    transform: translateY(-2px) scale(1.02);
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s ease-out;
   }
 
-  [data-sonner-toast][data-type="error"] [data-close-button] {
-    @apply text-red-100 hover:text-white hover:bg-red-700/50;
+  /* Subtle pulse animation for attention */
+  [data-sonner-toast][data-type="error"] {
+    animation:
+      toastSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+      subtlePulse 2s ease-in-out 0.6s infinite;
   }
 
-  [data-sonner-toast][data-type="warning"] [data-close-button] {
-    @apply text-amber-100 hover:text-white hover:bg-amber-700/50;
+  @keyframes subtlePulse {
+    0%,
+    100% {
+      box-shadow:
+        0 20px 25px -5px rgba(239, 68, 68, 0.4),
+        0 10px 10px -5px rgba(239, 68, 68, 0.2);
+    }
+    50% {
+      box-shadow:
+        0 20px 25px -5px rgba(239, 68, 68, 0.5),
+        0 10px 10px -5px rgba(239, 68, 68, 0.3);
+    }
   }
 
-  [data-sonner-toast][data-type="info"] [data-close-button] {
-    @apply text-blue-100 hover:text-white hover:bg-blue-700/50;
+  /* Better spacing without icon */
+  [data-sonner-toast] > div {
+    @apply gap-3;
+  }
+
+  /* Progress bar animation */
+  [data-sonner-toast] [data-progress] {
+    @apply bg-white/20;
+    animation: progressShrink linear forwards;
+  }
+
+  @keyframes progressShrink {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
   }
 }
