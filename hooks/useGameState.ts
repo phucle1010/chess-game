@@ -7,7 +7,7 @@ import { useSocket } from "@/lib/socket/client";
 import { gameService } from "@/services/client/game.service";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function useGameState(roomId: string | null) {
+export function useGameState(roomId: string | null, userId?: string | null) {
   const { data: game } = useGameByRoom(roomId);
   const { mutate: updateGame } = useUpdateGame();
   const { socket } = useSocket();
@@ -261,7 +261,7 @@ export function useGameState(roomId: string | null) {
 
   const makeMove = useCallback(
     (from: string, to: string, promotion?: string) => {
-      if (!chess || !game || !socket || !roomId) return false;
+      if (!chess || !game || !socket || !roomId || !userId) return false;
 
       try {
         // Create a copy of the chess instance to make the move
@@ -297,6 +297,25 @@ export function useGameState(roomId: string | null) {
             promotion: promotion || "q",
           });
 
+          // Check for game end conditions
+          let gameStatus: "active" | "waiting" | "finished" | "abandoned" =
+            game.status;
+          let winnerId: string | null = game.winner_id;
+
+          if (chessCopy.isCheckmate()) {
+            // The player who made the move wins (they checkmated the opponent)
+            gameStatus = "finished";
+            winnerId = userId || null;
+          } else if (chessCopy.isStalemate()) {
+            // Stalemate - draw
+            gameStatus = "finished";
+            winnerId = null;
+          } else if (chessCopy.isDraw()) {
+            // Draw (threefold repetition, insufficient material, etc.)
+            gameStatus = "finished";
+            winnerId = null;
+          }
+
           // Update game in database
           updateGame(
             {
@@ -305,6 +324,8 @@ export function useGameState(roomId: string | null) {
                 fen: newFen,
                 pgn: newPgn,
                 current_turn: newTurn,
+                status: gameStatus,
+                winner_id: winnerId,
               },
             },
             {
@@ -319,6 +340,7 @@ export function useGameState(roomId: string | null) {
                         newTurn === "white") ||
                       (updatedGame.bot_color === "black" &&
                         newTurn === "black"),
+                    gameStatus: updatedGame.status,
                   }
                 );
                 // Force refetch to ensure everything is in sync
@@ -335,7 +357,7 @@ export function useGameState(roomId: string | null) {
 
       return false;
     },
-    [chess, game, socket, roomId, updateGame]
+    [chess, game, socket, roomId, updateGame, userId]
   );
 
   return {

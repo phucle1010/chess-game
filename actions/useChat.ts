@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { chatService, SendMessageData } from "@/services/client/chat.service";
+import { chatService } from "@/services/client/chat.service";
+import { SendMessageData } from "@/types/chat";
 
 export function useChatMessages(roomId: string | null) {
   return useQuery({

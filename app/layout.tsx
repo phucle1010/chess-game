@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import "./globals.css";
-import { ReactQueryProvider } from "@/lib/react-query/provider";
+
+import { ReactQueryProvider, AuthProvider } from "@/providers";
+
 import { Toaster } from "@/components/ui/sonner";
+
+import "./globals.css";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -24,14 +27,16 @@ export const metadata: Metadata = {
     "chess ratings",
     "chess master",
   ],
-  authors: [{ name: "Chess Master Team", url: "https://your-domain.com" }],
+  authors: [
+    { name: "Chess Master Team", url: process.env.NEXT_PUBLIC_APP_URL! },
+  ],
   creator: "Chess Master Team",
-  metadataBase: new URL("https://your-domain.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
   openGraph: {
     title: "Chess Master | Online Chess Game & Leaderboard",
     description:
       "Play, compete and rise to the top – see the best chess players worldwide.",
-    url: "https://your-domain.com",
+    url: process.env.NEXT_PUBLIC_APP_URL!,
     siteName: "Chess Master",
     type: "website",
     images: [
@@ -72,6 +77,10 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_APP_URL,
+  },
+  category: "Games",
 };
 
 export default function RootLayout({
@@ -82,16 +91,16 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <head>
-        {/* SEO Enhancements */}
         <meta name="theme-color" content="#4f46e5" />
         <link rel="canonical" href="https://your-domain.com/" />
       </head>
       <body
         className={`${roboto.variable} antialiased bg-gradient-to-br from-violet-950 via-purple-900 to-indigo-950 `}
       >
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <ReactQueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ReactQueryProvider>
         <Toaster />
-        {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

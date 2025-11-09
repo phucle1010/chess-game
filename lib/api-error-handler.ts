@@ -14,11 +14,9 @@ export async function handleApiError(response: Response): Promise<never> {
     const errorData: ApiError = await response.json();
     errorMessage = errorData.error || errorData.message || errorMessage;
   } catch {
-    // If response is not JSON, use status text
     errorMessage = response.statusText || errorMessage;
   }
 
-  // Set error title based on status code
   switch (response.status) {
     case 400:
       errorTitle = "Bad Request";
@@ -26,7 +24,6 @@ export async function handleApiError(response: Response): Promise<never> {
     case 401:
       errorTitle = "Unauthorized";
       errorMessage = "Please login to continue";
-      // Redirect to login page for unauthorized errors
       if (typeof window !== "undefined") {
         const currentPath = window.location.pathname;
         if (!currentPath.startsWith("/auth")) {
@@ -54,12 +51,10 @@ export async function handleApiError(response: Response): Promise<never> {
       errorTitle = "Error";
   }
 
-  // Show toast notification
   toast.error(errorTitle, {
     description: errorMessage,
   });
 
-  // Throw error with message for React Query
   throw new Error(errorMessage);
 }
 

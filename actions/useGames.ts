@@ -1,11 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  gameService,
-  CreateGameData,
-  UpdateGameData,
-} from "@/services/client/game.service";
+import { gameService } from "@/services/client/game.service";
+import { CreateGameData, UpdateGameData } from "@/types/game";
 
 export function useGame(gameId: string | null) {
   return useQuery({

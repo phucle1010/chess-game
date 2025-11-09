@@ -100,6 +100,7 @@ CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid
 CREATE POLICY "Anyone can view rooms" ON rooms FOR SELECT USING (true);
 CREATE POLICY "Users can create rooms" ON rooms FOR INSERT WITH CHECK (auth.uid() = host_id);
 CREATE POLICY "Users can update own rooms" ON rooms FOR UPDATE USING (auth.uid() = host_id);
+CREATE POLICY "Users can delete own rooms" ON rooms FOR DELETE USING (auth.uid() = host_id);
 
 -- RLS Policies for room_players
 CREATE POLICY "Anyone can view room players" ON room_players FOR SELECT USING (true);

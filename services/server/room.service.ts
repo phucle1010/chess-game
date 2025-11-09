@@ -1,5 +1,8 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { Room, RoomPlayer } from "@/types/database";
+import { ValidationError } from "@/lib/errors";
+
+import { gameService } from "./game.service";
 
 export interface CreateRoomData {
   name: string;
@@ -12,13 +15,33 @@ export interface CreateRoomData {
 export const roomService = {
   async createRoom(data: CreateRoomData): Promise<Room> {
     const supabase = await createServerClient();
+
+    // Check if a room with the same name already exists (only for active/waiting rooms)
+    // Case-insensitive check to prevent duplicates like "My Room" and "my room"
+    const trimmedName = data.name.trim();
+    const { data: existingRooms, error: checkError } = await supabase
+      .from("rooms")
+      .select("id, name, status")
+      .ilike("name", trimmedName)
+      .in("status", ["waiting", "active"]);
+
+    if (checkError) {
+      throw new Error("Failed to validate room name");
+    }
+
+    if (existingRooms && existingRooms.length > 0) {
+      throw new ValidationError(
+        `A room with the name "${data.name}" already exists. Please choose a different name.`
+      );
+    }
+
     const { data: room, error } = await supabase
       .from("rooms")
       .insert({
-        name: data.name,
+        name: data.name.trim(),
         host_id: data.host_id,
         max_players: data.is_bot_room ? 1 : data.max_players || 2,
-        current_players: 1,
+        current_players: 0,
         status: "waiting",
         is_bot_room: data.is_bot_room || false,
         bot_difficulty: data.bot_difficulty || null,
@@ -28,9 +51,7 @@ export const roomService = {
 
     if (error) throw error;
 
-    // Add host as player
-    await this.joinRoom(room.id, data.host_id);
-
+    // Room is created empty, host needs to join explicitly
     return room;
   },
 
@@ -309,23 +330,53 @@ export const roomService = {
       );
     }
 
-    // Delete associated game if exists
-    if (room.game_id) {
-      const { gameService } = await import("./game.service");
-      try {
-        await gameService.deleteGame(room.game_id);
-      } catch (error) {
-        console.error("Error deleting game when deleting room:", error);
-        // Continue with room deletion even if game deletion fails
-      }
+    // Delete all games associated with this room
+    try {
+      await gameService.deleteGameByRoom(roomId);
+    } catch (error) {
+      console.error("Error deleting games when deleting room:", error);
+      // Continue with room deletion even if game deletion fails
     }
 
     // Delete all room players (should be empty, but clean up anyway)
-    await supabase.from("room_players").delete().eq("room_id", roomId);
+    const { error: playersError } = await supabase
+      .from("room_players")
+      .delete()
+      .eq("room_id", roomId);
+
+    if (playersError) {
+      console.error("Error deleting room players:", playersError);
+      // Continue with room deletion
+    }
+
+    // Delete all chat messages for this room
+    const { error: chatError } = await supabase
+      .from("chat_messages")
+      .delete()
+      .eq("room_id", roomId);
+
+    if (chatError) {
+      console.error("Error deleting chat messages:", chatError);
+      // Continue with room deletion
+    }
 
     // Delete the room
-    const { error } = await supabase.from("rooms").delete().eq("id", roomId);
+    const { error, data } = await supabase
+      .from("rooms")
+      .delete()
+      .eq("id", roomId)
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error deleting room:", error);
+      throw error;
+    }
+
+    // Verify deletion
+    if (!data || data.length === 0) {
+      throw new Error(
+        "Room was not deleted. It may not exist or you may not have permission."
+      );
+    }
   },
 };

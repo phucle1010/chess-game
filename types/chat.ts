@@ -1,7 +1,7 @@
-export interface Message {
-  id: string;
-  sender: string;
-  text: string;
-  timestamp: Date;
-  isSelf: boolean;
+export interface SendMessageData {
+  room_id: string;
+  user_id: string;
+  message: string;
 }
+
+export type { ChatMessage } from "./database";

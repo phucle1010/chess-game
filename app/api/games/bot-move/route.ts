@@ -46,17 +46,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if it's the bot's turn
-    const chess = new Chess(game.fen);
-    const isBotTurn =
-      (game.bot_color === "white" && chess.turn() === "w") ||
-      (game.bot_color === "black" && chess.turn() === "b");
-
-    if (!isBotTurn) {
-      return NextResponse.json({ error: "Not bot's turn" }, { status: 400 });
-    }
-
     // Get bot move
+    const chess = new Chess(game.fen);
     let botMove;
     try {
       botMove = await botService.getBotMove(

@@ -1,4 +1,5 @@
 import { Trophy, Medal, Award } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -24,6 +25,16 @@ export const ResultModal: React.FC<ResultModalProps> = ({
   onPlayAgain,
   onBackToHome,
 }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   const getResultConfig = () => {
     switch (result) {
       case "win":
@@ -74,11 +85,23 @@ export const ResultModal: React.FC<ResultModalProps> = ({
       >
         <DialogHeader>
           <div
-            className={`flex justify-center mb-4 py-6 bg-gradient-to-br ${config.bgGradient} rounded-lg`}
+            className={`flex justify-center mb-4 py-6 bg-gradient-to-br ${config.bgGradient} rounded-lg transition-all duration-1000 ${
+              isAnimating
+                ? "scale-110 rotate-12 animate-pulse"
+                : "scale-100 rotate-0"
+            }`}
           >
-            <Icon className={`h-20 w-20 ${config.iconColor}`} />
+            <Icon
+              className={`h-20 w-20 ${config.iconColor} transition-all duration-500 ${
+                isAnimating ? "animate-bounce" : ""
+              }`}
+            />
           </div>
-          <DialogTitle className="text-center text-2xl">
+          <DialogTitle
+            className={`text-center text-2xl transition-all duration-500 ${
+              isAnimating ? "scale-105" : "scale-100"
+            }`}
+          >
             {config.title}
           </DialogTitle>
           <DialogDescription className="text-center text-slate-400">

@@ -1,21 +1,6 @@
-// Client-side service that calls API routes instead of Supabase directly
 import { User } from "@/types/database";
+import { SignUpData, SignInData, ResetPasswordData } from "@/types/auth";
 import { fetchWithErrorHandling } from "@/lib/api-error-handler";
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  username: string;
-}
-
-export interface SignInData {
-  email: string;
-  password: string;
-}
-
-export interface ResetPasswordData {
-  email: string;
-}
 
 const API_BASE = "/api";
 

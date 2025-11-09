@@ -1,4 +1,3 @@
-// Client-side service that calls API routes instead of Supabase directly
 import { User } from "@/types/database";
 import { fetchWithErrorHandling } from "@/lib/api-error-handler";
 

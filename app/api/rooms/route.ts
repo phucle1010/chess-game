@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { roomService as serverRoomService } from "@/services/server/room.service";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,8 +58,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(room);
   } catch (error: unknown) {
+    if (error instanceof ValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+    if (error instanceof NotFoundError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+    console.error("Error creating room:", error);
     return NextResponse.json(
-      { error: (error as Error).message },
+      { error: (error as Error).message || "Failed to create room" },
       { status: 500 }
     );
   }

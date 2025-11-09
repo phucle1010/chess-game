@@ -1,18 +1,19 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  authService,
-  SignUpData,
-  SignInData,
-  ResetPasswordData,
-} from "@/services/client/auth.service";
+import { authService } from "@/services/client/auth.service";
+import { SignUpData, SignInData, ResetPasswordData } from "@/types/auth";
 
 export function useAuth() {
   return useQuery({
     queryKey: ["auth", "user"],
     queryFn: () => authService.getCurrentUser(),
     retry: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 }
 

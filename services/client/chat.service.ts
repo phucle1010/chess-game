@@ -1,12 +1,6 @@
-// Client-side service that calls API routes instead of Supabase directly
-import { ChatMessage } from "@/types/database";
+import { ChatMessage } from "@/types/chat";
+import { SendMessageData } from "@/types/chat";
 import { fetchWithErrorHandling } from "@/lib/api-error-handler";
-
-export interface SendMessageData {
-  room_id: string;
-  user_id: string;
-  message: string;
-}
 
 const API_BASE = "/api";
 
