@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { roomService, CreateRoomData } from "@/services/client/room.service";
+import { roomService } from "@/services/client/room.service";
 import { Room } from "@/types/database";
+import { CreateRoomData } from "@/types/room";
 
 export function useRooms() {
   return useQuery({

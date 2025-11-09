@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient as createSupabaseServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
@@ -15,42 +15,36 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      storage: {
-        getItem: (key: string) => {
-          return request.cookies.get(key)?.value ?? null;
-        },
-        setItem: (key: string, value: string) => {
-          // Update response with new cookie
+  const supabase = createSupabaseServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
           });
-          response.cookies.set(key, value, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
+          response.cookies.set({
+            name,
+            value,
+            ...options,
           });
-        },
-        removeItem: (key: string) => {
-          // Update response to remove cookie
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.delete(key);
-        },
+        });
       },
     },
   });
 
+  // For middleware route protection, we use getSession() to avoid rate limiting
+  // on every request. However, this is less secure than getUser().
+  // For actual user data operations, always use getUser() in API routes.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user ?? null;
 
   // Protect routes that require authentication
   const protectedPaths = ["/game", "/rooms", "/leaderboard"];
@@ -62,7 +56,6 @@ export async function updateSession(request: NextRequest) {
   // Redirect to login if accessing protected route without auth
   if (isProtectedPath && !user) {
     const redirectUrl = new URL("/auth/login", request.url);
-    // Only set redirect if it's a safe path (relative, same origin)
     const safePath = request.nextUrl.pathname.startsWith("/")
       ? request.nextUrl.pathname
       : "/";

@@ -1,20 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { User } from "@/types/database";
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  username: string;
-}
-
-export interface SignInData {
-  email: string;
-  password: string;
-}
-
-export interface ResetPasswordData {
-  email: string;
-}
+import { SignUpData, SignInData, ResetPasswordData } from "@/types/auth";
 
 export const authService = {
   async signUp(data: SignUpData) {
@@ -27,7 +13,6 @@ export const authService = {
     if (authError) throw authError;
     if (!authData.user) throw new Error("Failed to create user");
 
-    // Create user profile
     const { error: profileError } = await supabase.from("users").insert({
       id: authData.user.id,
       email: data.email,
@@ -80,11 +65,13 @@ export const authService = {
 
   async getCurrentUser(): Promise<User | null> {
     const supabase = await createServerClient();
+
     const {
       data: { user: authUser },
+      error: authError,
     } = await supabase.auth.getUser();
 
-    if (!authUser) return null;
+    if (authError || !authUser) return null;
 
     const { data, error } = await supabase
       .from("users")

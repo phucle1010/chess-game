@@ -1,14 +1,6 @@
-// Client-side service that calls API routes instead of Supabase directly
 import { Room, RoomPlayer } from "@/types/database";
+import { CreateRoomData } from "@/types/room";
 import { fetchWithErrorHandling } from "@/lib/api-error-handler";
-
-export interface CreateRoomData {
-  name: string;
-  host_id: string;
-  max_players?: number;
-  is_bot_room?: boolean;
-  bot_difficulty?: "easy" | "medium" | "hard";
-}
 
 const API_BASE = "/api";
 
